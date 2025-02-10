@@ -79,7 +79,9 @@ const Modal = ({
           className={`${modalSize}`}
           onClick={(e) => e.stopPropagation()}>
           <div id="md-header">
-            <span className={`${!title && "text-danger"}`}>{isTitleEmpty}</span>
+            <span className={`text-dark ${!title && "text-danger"}`}>
+              {isTitleEmpty}
+            </span>
             <span class="btn-close" aria-label="Close" onClick={closeModal} />
           </div>
           <div id="md-body">{children}</div>

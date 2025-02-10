@@ -2,11 +2,24 @@ import React, { useState } from "react";
 import dateTimeFormatter from "../../../hooks/dateTimeFormatter";
 import { useAuthContext } from "../../../hooks/context/useAuthContext";
 import Loader from "../../../components/loader/Loader";
-import donwloadIcon from "../../../assets/icons/download.svg";
+import downloadIcon from "../../../assets/icons/download-solid.svg";
+import ViewImageModal from "./ViewImageModal";
 const Message = ({ msg, index, popoverId, setPopoverid }) => {
+  const { API_URL } = useAuthContext();
   const [loadingStates, setLoadingStates] = useState({});
   const { user, popupFunction } = useAuthContext();
-
+  const [imageData, setImageData] = useState(null);
+  // IMAGE MODAL VARIABLES
+  const [viewImageModal, setViewImageModal] = useState(null);
+  const showImageModal = () => {
+    setViewImageModal(true);
+  };
+  const hideImageModal = () => {
+    setViewImageModal(false);
+  };
+  const handleResetImage = () => {
+    setImageData(null);
+  };
   if (!msg || !msg.sender) return null;
 
   const isSender = (senderId) => senderId === user?._id;
@@ -24,7 +37,25 @@ const Message = ({ msg, index, popoverId, setPopoverid }) => {
   const handleImageError = (fileId) => {
     setLoadingStates((prev) => ({ ...prev, [fileId]: false }));
   };
+  const handleImageDisplay = async (fileId) => {
+    try {
+      const response = await fetch(`${API_URL}/api/checkFile/${fileId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
 
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.warn("Error fetching file data:", result);
+      } else {
+        console.warn("File data:", result);
+      }
+    } catch (error) {
+      console.warn("Network error:", error);
+    }
+  };
   return (
     <>
       <div key={index} className="message-container">
@@ -60,7 +91,7 @@ const Message = ({ msg, index, popoverId, setPopoverid }) => {
                 msg?.message.some((file) => file?.fileType === "document")
                   ? "pb-2"
                   : "p-0"
-              }  gy-5`}>
+              }`}>
               {["image"].map((type) =>
                 msg?.message
                   .filter((file) => file?.fileType === type)
@@ -70,29 +101,23 @@ const Message = ({ msg, index, popoverId, setPopoverid }) => {
                     const fileType = file?.fileType || "None";
 
                     return (
-                      <>
+                      <span className="py-2">
                         {loadingStates[fileId] !== false && <Loader />}
-                        <span className="position-relative">
-                          <a
-                            className="btn btn-sm btn-primary rounded-pill z-3 position-absolute top-50 start-50 translate-middle"
-                            style={{
-                              boxShadow: `rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;`,
-                            }}
-                            href={`https://drive.google.com/uc?export=download&id=${fileId}`}>
-                            <img
-                              src={donwloadIcon}
-                              height={15}
-                              className="text-light"
-                            />
-                          </a>
+                        <span
+                          onClick={() => {
+                            setImageData(file);
+                            handleImageDisplay(file?.content);
+                            showImageModal();
+                          }}>
                           <img
                             src={`https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`}
-                            className="flex-shrink rounded-4"
+                            className="flex-shrink rounded-3"
                             style={{
                               height: "120px",
                               width: "120px",
                               objectFit: "cover",
                               cursor: "pointer",
+                              backgroundColor: "var(--dark-70)",
                               display:
                                 loadingStates[fileId] === false
                                   ? "block"
@@ -102,12 +127,12 @@ const Message = ({ msg, index, popoverId, setPopoverid }) => {
                             onError={() => handleImageError(fileId)}
                           />
                         </span>
-                      </>
+                      </span>
                     );
                   })
               )}
             </div>
-            <div className="d-flex flex-wrap w-100 gap-2 m-0 p-0 gy-5">
+            <div className="d-flex flex-wrap w-100 gap-2 m-0 p-0 ">
               {["document", "music", "video"].map((type) =>
                 msg?.message
                   .filter((file) => file?.fileType === type)
@@ -119,58 +144,61 @@ const Message = ({ msg, index, popoverId, setPopoverid }) => {
                     switch (fileType) {
                       case "music":
                         return (
-                          <div className="position-relative">
-                            <div className="container flex-grow-1 border border-dark rounded-3 px-3 py-2 ">
-                              {fileName}
+                          <div className="container flex-grow-1 border border-dark rounded-4 px-3 py-2 ">
+                            <p>{fileName}</p>
+                            <span className="d-flex justify-content-between align-items-center m-0 p-0 position-relative">
                               <a
-                                className="btn btn-sm btn-primary rounded-pill position-absolute top-0 start-100 translate-middle shadow-sm"
+                                className="btn btn-sm btn-primary rounded-pill position-absolute top-0 start-100 translate-middle shadow-sm "
                                 href={`https://drive.google.com/uc?export=download&id=${fileId}`}>
                                 <img
-                                  src={donwloadIcon}
-                                  height={15}
+                                  src={downloadIcon}
+                                  height={13}
                                   className="text-light"
                                 />
                               </a>
                               <iframe
+                                className="rounded-3"
                                 src={`https://drive.google.com/file/d/${fileId}/preview`}
                                 width="100%"
                                 height="65"
                                 allow="autoplay"
-                                style={{ backgroundColor: "transparent" }}
+                                style={{
+                                  backgroundColor: "transparent",
+                                  backgroundBlendMode: "overlay",
+                                }}
                               />
-                            </div>
+                            </span>
                           </div>
                         );
                         break;
                       case "video":
                         return (
-                          <span className="position-relative">
-                            <div className="container flex-grow-1 border border-dark rounded-3 px-3 py-2 ">
-                              <span className="d-flex justify-content-between align-items-center gap-2 mb-1 ">
-                                {fileName}
-                                <a
-                                  className="btn btn-sm btn-primary rounded-pill position-absolute top-0 start-100 translate-middle shadow-sm"
-                                  href={`https://drive.google.com/uc?export=download&id=${fileId}`}>
-                                  <img
-                                    src={donwloadIcon}
-                                    height={15}
-                                    className="text-light"
-                                  />
-                                </a>
-                              </span>
+                          <div className="container flex-grow-1 m-0 p-0 ">
+                            <span className="d-flex justify-content-between align-items-center m-0 p-0 pt-2 position-relative">
+                              <a
+                                className="btn btn-sm btn-primary rounded-pill position-absolute top-0 start-100  translate-middle shadow-sm  mt-2 "
+                                href={`https://drive.google.com/uc?export=download&id=${fileId}`}>
+                                <img
+                                  src={downloadIcon}
+                                  height={13}
+                                  className="text-light"
+                                />
+                              </a>
                               <iframe
+                                className="rounded-3"
                                 src={`https://drive.google.com/file/d/${fileId}/preview`}
                                 width="100%"
                                 allow="autoplay"
                                 style={{ backgroundColor: "transparent" }}
+                                allowFullScreen
                               />
-                            </div>
-                          </span>
+                            </span>
+                          </div>
                         );
                         break;
                       case "document":
                         return (
-                          <span className="row m-0 p-0 gap-2 border border-dark rounded-3 px-1 py-2">
+                          <span className="row m-0 p-0 gap-2 border border-dark rounded-4 px-1 py-2">
                             <span className="d-flex justify-content-evenly align-items-center gap-2">
                               {fileName || "None"}
                               <a
@@ -178,8 +206,8 @@ const Message = ({ msg, index, popoverId, setPopoverid }) => {
                                 href={`https://drive.google.com/uc?export=download&id=${fileId}`}
                                 download>
                                 <img
-                                  src={donwloadIcon}
-                                  height={15}
+                                  src={downloadIcon}
+                                  height={13}
                                   className="text-light"
                                 />
                               </a>
@@ -208,6 +236,12 @@ const Message = ({ msg, index, popoverId, setPopoverid }) => {
           </div>
         </div>
       </div>
+      <ViewImageModal
+        data={imageData}
+        resetData={handleResetImage}
+        show={viewImageModal}
+        onHide={hideImageModal}
+      />
     </>
   );
 };

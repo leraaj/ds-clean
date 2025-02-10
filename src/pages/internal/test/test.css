@@ -286,7 +286,7 @@
   position: absolute;
 }
 
-/* .msg-date-time {
+.msg-date-time {
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
   background-color: white;
@@ -296,14 +296,14 @@
   gap: 0.75rem;
   font-size: xx-small !important;
 }
-
+/* 
 .msg-date-time span {
   font-size: x-small;
   text-wrap: nowrap;
   z-index: 1007 !important;
 }
-
-.msg-date-time.appear {
+*/
+/* .msg-date-time.appear {
   animation: appear;
   opacity: 1;
   z-index: 1007 !important;
@@ -315,14 +315,14 @@
   z-index: 1007 !important;
 }
 
-@keyframes appear {
+  @keyframes appear {
   from {
     opacity: 0;
   }
   to {
     opacity: 1;
   }
-}
+}  
 
 @keyframes vanish {
   from {
@@ -332,6 +332,7 @@
     opacity: 0;
   }
 } */
+
 .x-button {
   border-radius: 50% !important;
   padding-inline: 0.5rem;
