@@ -65,6 +65,8 @@ const ViewAppointmentsModal = ({ show, onHide, id, refresh }) => {
       appointmentStatus: 1,
       phase: 2,
       initialRemarks: remarks,
+      meetingTime,
+      meetingLink,
     };
     await makeApiCall(
       UPDATE_APPOINTMENT_API,
@@ -80,6 +82,8 @@ const ViewAppointmentsModal = ({ show, onHide, id, refresh }) => {
       appointmentStatus: 1,
       phase: 3,
       finalRemarks: remarks,
+      meetingTime,
+      meetingLink,
     };
     await makeApiCall(
       UPDATE_APPOINTMENT_API,
@@ -271,7 +275,7 @@ const ViewAppointmentsModal = ({ show, onHide, id, refresh }) => {
               />
               <CustomButton
                 color="success"
-                label="Schedule Final Interview"
+                label="Schedule Client Interview"
                 onClick={createTeamBriefingInterview}
                 disabled={!remarks || !meetingLink || !meetingTime}
               />

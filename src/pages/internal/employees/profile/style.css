@@ -31,26 +31,16 @@
 .user-fullname {
   font-size: 1.25rem;
 }
-.pill-details {
-  padding: 1rem;
-  border: 1px var(--dark-50) solid;
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-  flex-direction: column;
-  margin-bottom: 1rem;
-  border-radius: 0.7rem;
-}
-.pill-label {
-  color: var(--dark-70);
-  font-weight: 600;
-  padding-bottom: 0.5rem;
-}
+
 .pill-skills {
+  padding: 0.5rem 0.8rem;
   border-radius: 1.5rem;
-  min-width: 80px;
-  padding: 0.5rem 1rem;
-  text-align: start;
+  border: 1px var(--dark-70) solid;
+  height: 40px;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  text-wrap: nowrap;
 }
 .pill-images {
   height: 100px;
@@ -59,9 +49,41 @@
   text-align: start;
   cursor: pointer;
 }
+.pill-details {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--dark-50);
+  border-radius: 0.7rem;
+}
+
+.pill-label {
+  font-weight: 600;
+  color: var(--dark-70);
+  padding: 0.5rem;
+  padding-bottom: 1.2rem;
+  /* No height! Let it be auto */
+}
+
 .pill-body {
-  height: 200px;
+  flex: 1 1 auto; /* Grow to fill the rest */
   overflow: auto;
-  gap: 0.8rem;
-  padding-block: 0.5rem;
+  display: flex; /* Or block, depending on your content */
+  gap: 0.5rem;
+  height: 300px;
+}
+
+.pill-images {
+  height: 200px;
+  width: 200px;
+  object-fit: cover;
+  cursor: pointer;
+  padding: 0.5rem;
+  flex: 1 1 auto; /* Grow to fill the rest */
+  border-radius: 1rem;
+}
+.cards:hover {
+  transform: scale(1.015);
+  transition: transform 0.3s ease;
 }

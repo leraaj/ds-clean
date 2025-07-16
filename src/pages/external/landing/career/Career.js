@@ -5,17 +5,30 @@ import { useAuthContext } from "../../../../hooks/context/useAuthContext";
 
 const Career = () => {
   const { API_URL } = useAuthContext();
-  const { data: jobs, loading: jobLoading } = useFetch(`${API_URL}/api/jobs`);
+  const { data: jobs, loading: jobLoading } = useFetch(
+    `${API_URL}/api/jobs?userId=6838795826b2d08f9bc41144`
+  );
   const { data: categories, loading: categoryLoading } = useFetch(
     `${API_URL}/api/categories`
   );
 
   // Group jobs by category
-  const categorizedJobs = categories?.reduce((acc, category) => {
-    acc[category.title] =
-      jobs?.filter((job) => job?.category?.title === category.title) || [];
-    return acc;
-  }, {});
+  console.log("Jobs:", jobs);
+  console.log("Categories:", categories);
+
+  const categorizedJobs = {};
+  if (jobs && categories) {
+    categories.forEach((category) => {
+      categorizedJobs[category.title] = jobs.filter((job) => {
+        const jobTitle = job?.category?.title?.toLowerCase();
+        const catTitle = category?.title?.toLowerCase();
+        console.log(`Comparing: "${jobTitle}" === "${catTitle}"`);
+        return jobTitle === catTitle;
+      });
+    });
+  } else {
+    console.error(categories);
+  }
 
   return (
     <div id="career" className="landing-section">

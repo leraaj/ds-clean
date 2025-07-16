@@ -6,11 +6,16 @@ import UpdateProfileModal from "./UpdateProfileModal";
 import "./style.css";
 import axios from "axios";
 import { toast } from "sonner";
+import useFetch from "../../../../hooks/useFetch";
 
 const Profile = () => {
   const { user, API_URL } = useAuthContext();
-  const API = `${API_URL}/api`;
-
+  const [selectedImage, setSelectedImage] = useState({});
+  const {
+    data: jobs,
+    loading: jobsLoading,
+    refresh: jobsRefresh,
+  } = useFetch(`${API_URL}/api/jobs?userId=${user?._id}`);
   // ADD MODAL VARIABLES
   const [viewImageModal, setViewImageModal] = useState(null);
   const showImageModal = () => setViewImageModal(true);
@@ -21,130 +26,215 @@ const Profile = () => {
   const showUpdateProfileModal = () => setUpdateProfileModal(true);
   const hideUpdateProfileModal = () => setUpdateProfileModal(false);
 
-  // Loading state for resume download
-  const [resumeLoad, setResumeLoad] = useState(false);
-
-  const handleCVDownload = async () => {
-    setResumeLoad(true); // Set loading state to true while downloading
-
-    try {
-      // Make a GET request to download the file as a blob
-      const response = await fetch(
-        `${API}/download-file/${user?.files?.resume?.id}`,
-        {
-          method: "GET",
-          credentials: "include", // Ensure credentials are sent
-        }
-      );
-
-      // Check if the response is successful
-      if (!response.ok) {
-        toast.error(`Error downloading file: ${response.message}`);
-        throw new Error("Failed to download file");
-      }
-
-      // Extract the filename from the Content-Disposition header
-      const filename = user?.files?.resume?.name;
-      const fileType = user?.files?.resume?.mimeType;
-      // Create a Blob from the response data
-      const blob = await response.blob();
-      // Create an object URL for the Blob and trigger a download
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      console.log(
-        `download:\n${JSON.stringify(user?.files?.resume, null, 2)} `
-      );
-      link.setAttribute("download", `${filename}.${fileType}`); // Set the filename for the download
-      document.body.appendChild(link);
-      link.click(); // Trigger the download
-      document.body.removeChild(link); // Clean up
-      toast.success("File downloaded successfully!");
-    } catch (error) {
-      console.error("Download error:", error);
-      toast.error(`Error downloading file: ${error.message}`);
-    } finally {
-      setResumeLoad(false); // Reset loading state after the download is complete
-    }
+  const [loadingStates, setLoadingStates] = useState({});
+  const handleImageLoad = (fileId) => {
+    setLoadingStates((prev) => ({ ...prev, [fileId]: false }));
   };
 
+  const handleImageError = (fileId) => {
+    setLoadingStates((prev) => ({ ...prev, [fileId]: false }));
+  };
+  const jobTitles = Array.isArray(jobs)
+    ? jobs
+        .filter((job) =>
+          user?.skills?.some((skill) =>
+            typeof skill === "string"
+              ? skill === job._id
+              : skill?._id === job._id
+          )
+        )
+        .map((job) => job.title)
+    : [];
+  console.log(`Jobs: ${jobs}`);
   return (
     <>
-      <div className="profile-container">
-        <div className="body overflow-auto">
-          <div className="row m-0 p-0 align-items-center gap-3 mb-3">
-            <div className="col-12 col-lg-auto photo-name-container row m-0 p-0 ">
-              <span className="col-auto ">
+      <div
+        class="profile-container text-center"
+        style={{
+          borderRadius: "1rem",
+          overflow: "hidden",
+        }}>
+        <div
+          className="row gap-4 px-4 "
+          style={{
+            height: ` 100%`,
+            overflowY: `auto` /* Scrollbar inside this element */,
+            padding: `1rem`,
+          }}>
+          <div className="container gap-1">
+            <div class="row row-cols-1">
+              <div class="col  d-flex justify-content-start align-items-center p-3">
                 <img
-                  src={user?.profile ? placeholder : placeholder}
+                  src={
+                    user?.profile?.id
+                      ? `https://drive.google.com/thumbnail?id=${user?.profile?.id}&sz=w500`
+                      : placeholder
+                  }
+                  onError={(e) => (e.currentTarget.src = placeholder)}
                   className="profile-picture"
                 />
-              </span>
-              <span className="col-12 col-md-auto user-fullname ">
-                {user?.fullName}
-              </span>
-            </div>
-            <span className="col-12 col-lg d-flex justify-content-end ">
-              <button className="btn btn-dark" onClick={showUpdateProfileModal}>
-                Update Profile
-              </button>
-            </span>
-          </div>
-          <div className="col vstack m-0 p-0">
-            <span className="form-label mb-3 fs-5">About</span>
-            <div className="pill-details">
-              <span className="pill-label">Email</span>
-              <span>{user?.email}</span>
-            </div>
-            <div className="pill-details">
-              <span className="pill-label">Contact Number</span>
-              <span>{user?.contact}</span>
-            </div>
-            <div className="pill-details">
-              <span className="pill-label col-auto">Resume/CV</span>
-              <span className="col-12 row align-items-center m-0 p-0">
-                <span className="col-12 m-0 p-0 row align-items-center justify-align-content-around">
-                  <span className="col">
-                    {user?.files?.resume?.name || "Upload one?"}
-                  </span>
-                  <span className="col-12 col-md-auto d-flex justify-content-end">
-                    <button
-                      className="btn btn-dark col-auto"
-                      onClick={handleCVDownload}
-                      disabled={resumeLoad} // Disable the button while downloading
-                    >
-                      {resumeLoad ? "Downloading..." : "Download"}
-                    </button>
-                  </span>
-                </span>
-              </span>
-            </div>
-            <div className="col-12 row mx-0 p-0 gap-3">
-              <div className="col-12 col-sm pill-details row m-0">
-                <span className="col-12 pill-label mb-2">Skills</span>
-                <span className="col-12 vstack pill-body">
-                  <span className="pill-skills">skill 1</span>
-                </span>
-              </div>
-              <div className="col-12 col-sm pill-details row m-0">
-                <span className="col-12 pill-label mb-2">Portfolio</span>
-                <span className="col-12 vstack pill-body">
-                  <img
-                    src={placeholder}
-                    className="pill-images"
-                    onClick={showImageModal}
-                  />
-                </span>
               </div>
             </div>
+            <div class="row row-cols-2 align-items-center">
+              <div class="col text-start p-0 m-0 h4 form-label-light">
+                About
+              </div>
+              {/* <div class="col nav-link text-end">Edit</div> */}
+            </div>
+            <div class="row row-cols-1">
+              <div class="col d-flex justify-content-start">
+                <div class="col-12 row m-0 align-items-center ">
+                  <div class="col-auto text-start col-form-label ">
+                    Fullname:
+                  </div>
+
+                  <div class="col ">
+                    <input
+                      type="text"
+                      className={`form-control form-control-light col`}
+                      value={user?.fullName}
+                      name="fullName"
+                      readOnly
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="col d-flex justify-content-start">
+                <div class="col-12 row m-0 align-items-center">
+                  <div class="col-auto text-start col-form-label">Email:</div>
+                  <div class="col ">
+                    <input
+                      type="text"
+                      className={`form-control form-control-light col`}
+                      value={user?.email}
+                      name="email"
+                      readOnly
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="col  d-flex justify-content-start">
+                <div class="col-12 row m-0 align-items-center">
+                  <div class="col-auto text-start col-form-label">
+                    Contact number:
+                  </div>
+                  <div class="col ">
+                    <input
+                      type="number"
+                      className={`form-control form-control-light col`}
+                      value={user?.contact}
+                      name="contact"
+                      readOnly
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+
+          {user?.position != 1 && (
+            <>
+              <div className="container gap-1">
+                <div class="row row-cols-2 align-items-center">
+                  <div class="col text-start p-0 m-0 h4 form-label-light">
+                    Resume
+                  </div>
+                  {/* <div class="col nav-link text-end">Edit</div> */}
+                </div>
+                <div class="row row-cols-2 align-items-center">
+                  <div class="col d-flex justify-content-start">
+                    <div class="col-12 row m-0 align-items-center">
+                      <div class="col-auto text-start col-form-label">
+                        Filename:
+                      </div>
+                      <div class="col text-start">
+                        {user?.resume?.name || "Upload one?"}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col d-flex justify-content-end">
+                    <a
+                      className="btn btn-sm btn-primary col-auto"
+                      href={`https://drive.google.com/uc?export=download&id=${user?.resume?.id}`}>
+                      Download
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div className="container gap-1">
+                <div class="row row-cols-2 align-items-center">
+                  <div class="col text-start p-0 m-0 h4 form-label-light">
+                    Skills
+                  </div>
+                  {/* <div class="col nav-link text-end">Edit</div> */}
+                </div>
+                <div class="row m-0 g-1 gap-1 p-2 flex-wrap overflow-auto">
+                  {jobsLoading ? (
+                    <span className="text-muted">Loading...</span>
+                  ) : jobTitles.length > 0 ? (
+                    jobTitles.map((title, index) => (
+                      <div
+                        key={index}
+                        class="btn btn-dark col-auto rounded-pill ">
+                        {title}
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-muted">No matched jobs</span>
+                  )}
+                </div>
+              </div>
+              <div className="container gap-1">
+                <div class="row row-cols-2 align-items-center">
+                  <div class="col text-start p-0 m-0 h4 form-label-light">
+                    Portfolio
+                  </div>
+                  {/* <div class="col nav-link text-end">Edit</div> */}
+                </div>
+                <div class="row m-0 g-1 p-2 flex-wrap">
+                  {user?.portfolio?.map((file, index) => {
+                    return (
+                      <img
+                        key={file?.id}
+                        src={
+                          `https://drive.google.com/thumbnail?id=${file?.id}&sz=w500` ||
+                          placeholder
+                        }
+                        className="cards col-12 col-sm-6 col-md-4 col-lg-2"
+                        onLoad={() => handleImageLoad(file?.id)}
+                        onError={() => handleImageError(file?.id)}
+                        style={{
+                          height: "120px",
+                          objectFit: "cover",
+                          borderRadius: "1rem",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          showImageModal();
+                          setSelectedImage({
+                            id: file?.id,
+                            name: file?.name,
+                          });
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
       <UpdateProfileModal
         show={updateProfileModal}
         onHide={hideUpdateProfileModal}
       />
-      <ViewImageModal show={viewImageModal} onHide={hideImageModal} />
+      <ViewImageModal
+        show={viewImageModal}
+        onHide={hideImageModal}
+        image_id={selectedImage?.id}
+        image_name={selectedImage?.name}
+      />
     </>
   );
 };

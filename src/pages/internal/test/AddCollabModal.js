@@ -25,7 +25,7 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
 
   const { data: categoryData } = useFetch(`${API_URL}/api/categories`);
   const { data: applicants } = useFetch(`${API_URL}/api/applicants`);
-  const { data: jobData } = useFetch(`${API_URL}/api/jobs`);
+  const { data: jobData } = useFetch(`${API_URL}/api/jobs?userId=${user?._id}`);
 
   // Create a count of applicants for each job
   const jobApplicantCounts = jobData?.map((job) => {
@@ -196,6 +196,7 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
                 <span>No applicants selected.</span>
               ) : (
                 filteredApplicants.map((app) => {
+                  if (!app.user || !app.user._id) return null;
                   const isSelected = selectedApplicants.includes(app.user._id);
                   return (
                     <div

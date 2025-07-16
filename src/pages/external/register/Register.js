@@ -104,9 +104,9 @@ const Register = () => {
     <div className="landing-section d-flex justify-content-center ">
       <div className="col-11">
         <span className="bar-title" style={{ paddingBottom: "3rem" }}>
-          Welcome, Client!
+          Interested in Our Services?
           <br />
-          Register Below
+          Register Here
         </span>
         <form
           className="needs-validation row mx-0 g-3"

@@ -17,7 +17,6 @@ import QRcodePage from "./pages/external/landing/qrcodePage/Index";
 import Register from "./pages/external/register/Register";
 function App() {
   const { user, isLoading } = useAuthContext();
-
   const defaultRoutes = [
     {
       isPrivate: false,

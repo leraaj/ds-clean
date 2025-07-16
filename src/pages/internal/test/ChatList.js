@@ -170,7 +170,7 @@ const ChatList = ({
               );
             })
           ) : (
-            <p className="text-center">Start creating groups</p>
+            <p className="text-center">No available groups yet</p>
           )}
         </div>
         <div className="footer"></div>

@@ -6,14 +6,14 @@ import AddJobModal from "./AddJobModal";
 import ViewJobModal from "./UpdateJobModal";
 import { useAuthContext } from "../../../../hooks/context/useAuthContext";
 const Jobs = () => {
-  const { API_URL } = useAuthContext();
+  const { API_URL, user } = useAuthContext();
   const API = `${API_URL}/api/`;
   const [selectedJob, setSelectedJob] = useState({});
   const {
     data: jobs,
     loading: jobsLoading,
     refresh: jobsRefresh,
-  } = useFetch(`${API}jobs`);
+  } = useFetch(`${API}jobs?userId=${user?._id}`);
   const data = useMemo(() => {
     if (!jobs) return [];
     return jobs.map((job) => {

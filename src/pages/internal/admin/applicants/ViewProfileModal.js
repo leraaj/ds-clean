@@ -1,8 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import Modal from "../../../../components/modal/Modal";
 import placeholder from "../../../../assets/images/placeholder/img_blank.png";
 
 const ViewProfileModal = ({ show, onHide, user }) => {
+  const [loadingStates, setLoadingStates] = useState({});
+  const handleImageLoad = (fileId) => {
+    setLoadingStates((prev) => ({ ...prev, [fileId]: false }));
+  };
+
+  const handleImageError = (fileId) => {
+    setLoadingStates((prev) => ({ ...prev, [fileId]: false }));
+  };
   const modalClose = () => {
     onHide();
   };
