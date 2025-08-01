@@ -64,14 +64,22 @@ const Profile = () => {
           <div className="container gap-1">
             <div class="row row-cols-1">
               <div class="col  d-flex justify-content-start align-items-center p-3">
-                <img
+                <iframe
+                  title="Uploaded Resume"
                   src={
                     user?.profile?.id
-                      ? `https://drive.google.com/thumbnail?id=${user?.profile?.id}&sz=w500`
+                      ? `https://drive.google.com/file/d/${user?.profile?.id}/preview`
                       : placeholder
                   }
-                  onError={(e) => (e.currentTarget.src = placeholder)}
                   className="profile-picture"
+                  // allow="autoplay"
+                  style={{
+                    objectFit: "cover",
+                    borderRadius: "1rem",
+                    padding: "0rem",
+                    border: "none",
+                    pointerEvents: "none",
+                  }}
                 />
               </div>
             </div>
@@ -191,31 +199,44 @@ const Profile = () => {
                   </div>
                   {/* <div class="col nav-link text-end">Edit</div> */}
                 </div>
-                <div class="row m-0 g-1 p-2 flex-wrap">
+                <div class="row m-0 gap-1 p-2 flex-wrap">
                   {user?.portfolio?.map((file, index) => {
                     return (
+                      // <iframe
+                      //   title="Uploaded Resume"
+                      //   className="col-auto"
+                      //   height={300}
+                      //   width={300}
+                      //   style={{
+                      //     objectFit: "cover",
+                      //     borderRadius: "1rem",
+                      //     padding: "0rem",
+                      //     border: "none",
+                      //   }}
+                      //   seamless
+                      //   onClick={showImageModal}
+                      //   onLoad={() => handleImageLoad(file?.id)}
+                      //   onError={() => handleImageError(file?.id)}
+                      //   src={`https://drive.google.com/file/d/${file?.id}/preview`}
+                      //   allow="autoplay"
+                      // />
                       <img
-                        key={file?.id}
-                        src={
-                          `https://drive.google.com/thumbnail?id=${file?.id}&sz=w500` ||
-                          placeholder
-                        }
-                        className="cards col-12 col-sm-6 col-md-4 col-lg-2"
-                        onLoad={() => handleImageLoad(file?.id)}
-                        onError={() => handleImageError(file?.id)}
+                        src={`https://drive.google.com/thumbnail?id=${file?.id}&sz=w500`}
+                        className="flex-shrink rounded-3"
                         style={{
                           height: "120px",
+                          width: "120px",
                           objectFit: "cover",
-                          borderRadius: "1rem",
                           cursor: "pointer",
+                          backgroundColor: "var(--dark-70)",
+                          display:
+                            loadingStates[file?.id] === false
+                              ? "block"
+                              : "none",
                         }}
-                        onClick={() => {
-                          showImageModal();
-                          setSelectedImage({
-                            id: file?.id,
-                            name: file?.name,
-                          });
-                        }}
+                        onClick={showImageModal}
+                        onLoad={() => handleImageLoad(file?.id)}
+                        onError={() => handleImageError(file?.id)}
                       />
                     );
                   })}

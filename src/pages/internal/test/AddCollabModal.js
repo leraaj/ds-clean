@@ -8,16 +8,16 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
   const { user, API_URL } = useAuthContext();
   const COLLABORATION_API = `${API_URL}/api/collaborator`;
   const client = user?._id;
+
   const [title, setTitle] = useState("");
-  const titleRef = useRef(null); // Create a ref for the title input
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedJob, setSelectedJob] = useState("");
-  const jobRef = useRef(null); // Create a ref for the title input
   const [selectedApplicants, setSelectedApplicants] = useState([]);
-  // Validations
-  const handleTitle = (e) => {
-    setTitle(e.target.value);
-  };
+
+  const titleRef = useRef(null);
+  const jobRef = useRef(null);
+
+  const handleTitle = (e) => setTitle(e.target.value);
   const handleJob = (e) => {
     setSelectedApplicants([]);
     setSelectedJob(e.target.value);
@@ -25,9 +25,10 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
 
   const { data: categoryData } = useFetch(`${API_URL}/api/categories`);
   const { data: applicants } = useFetch(`${API_URL}/api/applicants`);
-  const { data: jobData } = useFetch(`${API_URL}/api/jobs?userId=${user?._id}`);
+  const { data: jobData, loading: jobDataLoading } = useFetch(
+    `${API_URL}/api/jobs?userId=${user?._id}`
+  );
 
-  // Create a count of applicants for each job
   const jobApplicantCounts = jobData?.map((job) => {
     const count = applicants?.filter(
       (applicant) => applicant.job && applicant.job._id === job._id
@@ -35,9 +36,15 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
     return { ...job, applicantCount: count };
   });
 
-  const filteredApplicants = Array.isArray(applicants)
-    ? applicants?.filter((applicant) => applicant.job && applicant.job._id)
-    : [];
+  // const filteredApplicants = Array.isArray(applicants)
+  //   ? applicants.filter(
+  //       (applicant) =>
+  //         applicant.job &&
+  //         applicant.job._id === selectedJob &&
+  //         applicant.user &&
+  //         applicant.user._id
+  //     )
+  //   : [];
 
   const onClose = () => {
     onHide();
@@ -46,12 +53,13 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
 
   const handleSubmit = async () => {
     const data = {
-      title: title,
-      client: client,
+      title,
+      client,
       users: selectedApplicants,
       job: selectedJob,
       senderId: user?._id,
     };
+
     if (title === "" || selectedApplicants.length < 3 || selectedJob === "") {
       titleRef.current.focus();
       toast.error("All fields are required!");
@@ -61,12 +69,10 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
         toast.error("Please select at least 3 applicants");
       } else if (selectedJob === "") {
         jobRef.current.focus();
-      } else {
-        titleRef.current.focus();
-        toast.error("All fields are required!");
       }
       return;
     }
+
     try {
       const response = await fetch(COLLABORATION_API, {
         method: "POST",
@@ -74,11 +80,13 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
         credentials: "include",
         body: JSON.stringify(data),
       });
+
       if (response.status === 400) {
         const error = await response.json();
-        titleRef.current.focus(); // Focus on the title input
+        titleRef.current.focus();
         return toast.warning(error.message);
       }
+
       onClose();
       socket.emit("new_collaborator", {
         message: "Adding new collaborator",
@@ -97,6 +105,32 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
     titleRef.current.value = "";
     jobRef.current.value = "";
   };
+  const filteredApplicants = Array.isArray(applicants)
+    ? applicants
+        .filter(
+          (app) =>
+            app.job &&
+            app.job._id &&
+            app.user &&
+            app.user._id &&
+            app.job._id === selectedJob
+        )
+        .map((app) => {
+          const userId = app.user._id;
+          const userFullName = app.user.fullName;
+
+          // Find all jobs this applicant applied to
+          const jobsOfUser = applicants
+            .filter((a) => a.user?._id === userId && a.job?.title)
+            .map((a) => a.job.title);
+
+          return {
+            userId,
+            fullName: userFullName,
+            jobTitles: [...new Set(jobsOfUser)], // Remove duplicates
+          };
+        })
+    : [];
 
   return (
     <Modal
@@ -113,37 +147,43 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
             <label className="form-label">Title</label>
             <input
               type="text"
-              className={`form-control form-control-light  `}
+              className="form-control form-control-light"
               onChange={handleTitle}
               ref={titleRef}
               required
             />
           </div>
+
           {/* JOB */}
           <div className="mb-3">
             <label className="form-label">Job</label>
             <div className="d-flex gap-2 col-12">
               <div className="col">
                 <select
-                  className={`form-control form-control-light`}
+                  className="form-control form-control-light"
                   onChange={handleJob}
                   ref={jobRef}
                   required>
                   <option value="">Select Job</option>
-                  {jobApplicantCounts?.map((job) => (
-                    <option key={job._id} value={job._id}>
-                      {job.title}
-                    </option>
-                  ))}
+                  {jobDataLoading ? (
+                    <option disabled>Loading...</option>
+                  ) : (
+                    jobApplicantCounts?.map((job) => (
+                      <option key={job._id} value={job._id}>
+                        {job.title}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
             </div>
           </div>
         </section>
+
         <section className="col-12 row m-0 p-0">
           {/* Selected Applicants */}
           <div className="col-12 mb-3">
-            <label className={`form-label`}>
+            <label className="form-label">
               Selected Applicants ({selectedApplicants.length})
             </label>
             <div className="hstack gap-2 px-2 overflow-auto pb-2">
@@ -159,11 +199,6 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
                       <div className="col-auto row align-items-center p-0 m-0 gap-0">
                         <span className="col-auto">
                           {applicant.user.fullName}
-                          {/* <span
-                            className="col-auto text-muted "
-                            style={{ fontSize: "0.8rem" }}>
-                            {` (${applicant.job.title})`}
-                          </span> */}
                         </span>
                       </div>
                       <div className="col-auto d-flex justify-content-center align-items-center ">
@@ -188,26 +223,28 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
               )}
             </div>
           </div>
+
           {/* Applicants Available */}
-          <div className="col-12  mb-3">
+          <div className="col-12 mb-3">
             <label className="form-label">Applicants Available</label>
             <div className="vstack gap-2 px-2">
               {selectedJob === "" ? (
-                <span>No applicants selected.</span>
+                <span>Select a job to view applicants.</span>
+              ) : filteredApplicants.length === 0 ? (
+                <span>No applicants found for this job.</span>
               ) : (
                 filteredApplicants.map((app) => {
-                  if (!app.user || !app.user._id) return null;
-                  const isSelected = selectedApplicants.includes(app.user._id);
+                  const isSelected = selectedApplicants.includes(app.userId);
                   return (
                     <div
                       className="d-flex justify-content-between align-items-center"
-                      key={app.user._id}>
+                      key={app.userId}>
                       <span className="col-auto">
-                        {app.user.fullName}
+                        {app.fullName}
                         <span
-                          className="col-auto text-muted "
+                          className="col-auto text-muted"
                           style={{ fontSize: "0.8rem" }}>
-                          {` (${app.job.title})`}
+                          {` (${app.jobTitles.join(", ")})`}
                         </span>
                       </span>
                       {!isSelected ? (
@@ -215,11 +252,10 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
                           className="btn btn-sm btn-success"
                           onClick={(e) => {
                             e.preventDefault();
-                            setSelectedApplicants((prev) =>
-                              isSelected
-                                ? prev.filter((id) => id !== app.user._id)
-                                : [app.user._id, ...prev]
-                            );
+                            setSelectedApplicants((prev) => [
+                              app.userId,
+                              ...prev,
+                            ]);
                           }}>
                           Select
                         </button>

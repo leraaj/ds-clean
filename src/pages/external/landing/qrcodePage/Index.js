@@ -2,8 +2,8 @@ import React from "react";
 import { QRCodeCanvas } from "qrcode.react"; // Updated import
 
 const Index = () => {
-  const apkUrl = "https://drive.google.com/uc?export=download&id=YOUR_FILE_ID"; // Replace YOUR_FILE_ID with actual ID
-
+  const apkUrl = `https://drive.google.com/uc?export=download&id=1A9mb1SV55P30kGpIIR-iQ3GF1vyVNEEv`;
+  // https://drive.google.com/file/d/1A9mb1SV55P30kGpIIR-iQ3GF1vyVNEEv/view?usp=sharing
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Install Our App</h1>
