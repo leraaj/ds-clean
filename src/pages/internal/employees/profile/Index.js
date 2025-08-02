@@ -64,23 +64,37 @@ const Profile = () => {
           <div className="container gap-1">
             <div class="row row-cols-1">
               <div class="col  d-flex justify-content-start align-items-center p-3">
-                <iframe
-                  title="Uploaded Resume"
-                  src={
-                    user?.profile?.id
-                      ? `https://drive.google.com/file/d/${user?.profile?.id}/preview`
-                      : placeholder
-                  }
-                  className="profile-picture"
-                  // allow="autoplay"
-                  style={{
-                    objectFit: "cover",
-                    borderRadius: "1rem",
-                    padding: "0rem",
-                    border: "none",
-                    pointerEvents: "none",
-                  }}
-                />
+                {user?.profile?.id ? (
+                  <iframe
+                    title="Uploaded Resume"
+                    src={
+                      user?.profile?.id &&
+                      `https://drive.google.com/file/d/${user?.profile?.id}/preview`
+                    }
+                    className="profile-picture"
+                    // allow="autoplay"
+                    style={{
+                      objectFit: "cover",
+                      borderRadius: "1rem",
+                      padding: "0rem",
+                      border: "none",
+                      pointerEvents: "none",
+                    }}
+                  />
+                ) : (
+                  <img
+                    src={placeholder}
+                    className="profile-picture"
+                    // allow="autoplay"
+                    style={{
+                      objectFit: "cover",
+                      borderRadius: "1rem",
+                      padding: "0rem",
+                      border: "none",
+                      pointerEvents: "none",
+                    }}
+                  />
+                )}
               </div>
             </div>
             <div class="row row-cols-2 align-items-center">
@@ -162,7 +176,10 @@ const Profile = () => {
                   </div>
                   <div class="col d-flex justify-content-end">
                     <a
-                      className="btn btn-sm btn-primary col-auto"
+                      className={`btn btn-sm btn-primary col-auto ${
+                        user?.resume?.id ? false : `disabled`
+                      }`}
+                      disabled={user?.resume?.id ? false : true}
                       href={`https://drive.google.com/uc?export=download&id=${user?.resume?.id}`}>
                       Download
                     </a>

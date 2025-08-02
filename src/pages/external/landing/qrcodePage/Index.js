@@ -2,7 +2,6 @@ import React from "react";
 import { QRCodeCanvas } from "qrcode.react"; // Updated import
 
 const Index = () => {
-  const apkUrl = `https://drive.google.com/uc?export=download&id=1A9mb1SV55P30kGpIIR-iQ3GF1vyVNEEv`;
   // https://drive.google.com/file/d/1A9mb1SV55P30kGpIIR-iQ3GF1vyVNEEv/view?usp=sharing
   return (
     <div style={styles.container}>
@@ -11,7 +10,11 @@ const Index = () => {
         Scan the QR code below to download and install the app on your mobile
         device.
       </p>
-      <QRCodeCanvas value={apkUrl} size={200} style={styles.qrCode} />
+      <QRCodeCanvas
+        value={process.env.REACT_APP_QR_CODE}
+        size={200}
+        style={styles.qrCode}
+      />
     </div>
   );
 };

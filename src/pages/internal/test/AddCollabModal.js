@@ -19,11 +19,11 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
 
   const handleTitle = (e) => setTitle(e.target.value);
   const handleJob = (e) => {
-    setSelectedApplicants([]);
     setSelectedJob(e.target.value);
   };
 
   const { data: categoryData } = useFetch(`${API_URL}/api/categories`);
+  const { data: appointments } = useFetch(`${API_URL}/api/appointments`);
   const { data: applicants } = useFetch(`${API_URL}/api/applicants`);
   const { data: jobData, loading: jobDataLoading } = useFetch(
     `${API_URL}/api/jobs?userId=${user?._id}`
@@ -107,31 +107,43 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
   };
   const filteredApplicants = Array.isArray(applicants)
     ? applicants
-        .filter(
-          (app) =>
-            app.job &&
-            app.job._id &&
-            app.user &&
-            app.user._id &&
-            app.job._id === selectedJob
-        )
-        .map((app) => {
-          const userId = app.user._id;
-          const userFullName = app.user.fullName;
+        // Step 1: Get unique users who applied to the selected job
+        .filter((app) => app.user?._id && app.job?._id === selectedJob)
+        .map((app) => app.user._id) // Get matching user IDs
+        .filter((value, index, self) => self.indexOf(value) === index) // unique
 
-          // Find all jobs this applicant applied to
-          const jobsOfUser = applicants
-            .filter((a) => a.user?._id === userId && a.job?.title)
-            .map((a) => a.job.title);
+        // Step 2: For each userId, collect full info
+        .map((userId) => {
+          const userApplications = applicants.filter(
+            (a) => a.user?._id === userId && a.job?.title
+          );
+
+          const user = userApplications[0]?.user;
 
           return {
             userId,
-            fullName: userFullName,
-            jobTitles: [...new Set(jobsOfUser)], // Remove duplicates
+            fullName: user?.fullName || "Unknown",
+            jobTitles: [...new Set(userApplications.map((a) => a.job.title))],
           };
         })
     : [];
+  const hiredCounts = {};
+  if (Array.isArray(appointments)) {
+    appointments.forEach((appointment) => {
+      const jobId = appointment.job?._id;
+      const isHired =
+        appointment.phase === 3 &&
+        appointment.appointmentStatus === 2 &&
+        appointment.complete === 1;
 
+      if (jobId && isHired) {
+        hiredCounts[jobId] = (hiredCounts[jobId] || 0) + 1;
+      }
+    });
+  }
+  console.log(hiredCounts);
+  console.log(applicants);
+  console.log(filteredApplicants);
   return (
     <Modal
       show={show}
@@ -168,11 +180,15 @@ const AddGroupModal = ({ show, onHide, socket, io }) => {
                   {jobDataLoading ? (
                     <option disabled>Loading...</option>
                   ) : (
-                    jobApplicantCounts?.map((job) => (
-                      <option key={job._id} value={job._id}>
-                        {job.title}
-                      </option>
-                    ))
+                    jobApplicantCounts?.map((job) => {
+                      const hiredCount = hiredCounts[job._id] || 0;
+                      return (
+                        <option key={job._id} value={job._id}>
+                          {job.title}
+                          {hiredCount > 0 ? ` (${hiredCount})` : ""}
+                        </option>
+                      );
+                    })
                   )}
                 </select>
               </div>

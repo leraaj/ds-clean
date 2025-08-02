@@ -85,7 +85,7 @@ const Message = ({ msg, index, popoverId, setPopoverid }) => {
           onMouseLeave={() => setPopoverid("")}>
           {/* <span className="text-success">{fileType || type}</span> */}
           <div className="msg-content text-break d-flex align-items-center flex-wrap ">
-            {type === "text" ? content + "TEXT" : ""}
+            {type === "text" ? content : ""}
             <div
               className={`d-flex flex-wrap w-100 gap-2 m-0 p-0 ${
                 msg?.message.some((file) => file?.fileType === "document")
