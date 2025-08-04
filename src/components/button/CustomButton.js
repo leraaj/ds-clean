@@ -16,7 +16,7 @@ const CustomButton = ({
       className={`btn 
       btn-${color ? color : "primary"} 
       ${size ? `btn-` + size : ""} 
-      text-nowrap ${className}`}
+      text-nowrap ${className || ""}`}
       {...((disabled || isLoading) && { disabled: true })}
       onClick={onClick}>
       {label}

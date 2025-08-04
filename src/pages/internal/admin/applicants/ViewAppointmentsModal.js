@@ -289,7 +289,7 @@ const ViewAppointmentsModal = ({ show, onHide, id, refresh }) => {
                 disabled={!remarks}
               />
               <CustomButton
-                color="succcess"
+                color="success"
                 label="Proceed"
                 onClick={() => setShowMeetingForms(true)}
                 disabled={!remarks}

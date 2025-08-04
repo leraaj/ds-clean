@@ -63,6 +63,7 @@ const ChatMessage = ({ selectedRoom, back, socket, fetchRooms }) => {
   const fileInputRef = useRef(null);
   const [message, setMessage] = useState("");
   const handleSendMessage = async () => {
+    sendButtonRef.current.disabled = true;
     const textMessage = {
       senderId: user?._id,
       collaboratorId: selectedRoom?._id,
@@ -121,6 +122,8 @@ const ChatMessage = ({ selectedRoom, back, socket, fetchRooms }) => {
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      sendButtonRef.current.disabled = false;
     }
   };
   const handleFilesUploadClick = () => {
@@ -161,12 +164,7 @@ const ChatMessage = ({ selectedRoom, back, socket, fetchRooms }) => {
       }
     }
   };
-  const handleKeyDown = (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault(); // Prevent the default behavior (e.g., form submission)
-      handleSendMessage();
-    }
-  };
+
   const handleDeleteFile = (index) => {
     setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
@@ -234,6 +232,15 @@ const ChatMessage = ({ selectedRoom, back, socket, fetchRooms }) => {
       console.error("Error during file upload:", error);
     }
   };
+  const sendButtonRef = useRef();
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault(); // Prevent the default behavior (e.g., form submission)
+      handleSendMessage();
+    }
+  };
+
   return (
     <div className={`chatMessage col col-sm col-md col-lg ${selectedRoom}`}>
       {messagesLoading ? (
@@ -375,6 +382,7 @@ const ChatMessage = ({ selectedRoom, back, socket, fetchRooms }) => {
                   </button>
                   <button
                     className="btn-send"
+                    ref={sendButtonRef}
                     onClick={handleSendMessage}
                     disabled={messagesLoading}>
                     <img src={SendIcon} className="icon" alt="Send" />
