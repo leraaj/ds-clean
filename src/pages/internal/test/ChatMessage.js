@@ -63,6 +63,7 @@ const ChatMessage = ({ selectedRoom, back, socket, fetchRooms }) => {
   const fileInputRef = useRef(null);
   const [message, setMessage] = useState("");
   const handleSendMessage = async () => {
+    setIsSending(true);
     sendButtonRef.current.disabled = true;
     const textMessage = {
       senderId: user?._id,
@@ -123,6 +124,7 @@ const ChatMessage = ({ selectedRoom, back, socket, fetchRooms }) => {
     } catch (error) {
       console.log(error);
     } finally {
+      setIsSending(false);
       sendButtonRef.current.disabled = false;
     }
   };
@@ -233,11 +235,12 @@ const ChatMessage = ({ selectedRoom, back, socket, fetchRooms }) => {
     }
   };
   const sendButtonRef = useRef();
+  const [isSending, setIsSending] = useState(false); // new state
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
-      event.preventDefault(); // Prevent the default behavior (e.g., form submission)
-      handleSendMessage();
+      event.preventDefault();
+      handleSendMessage(); // safe now because of the isSending guard
     }
   };
 
@@ -384,9 +387,14 @@ const ChatMessage = ({ selectedRoom, back, socket, fetchRooms }) => {
                     className="btn-send"
                     ref={sendButtonRef}
                     onClick={handleSendMessage}
-                    disabled={messagesLoading}>
-                    <img src={SendIcon} className="icon" alt="Send" />
+                    disabled={isSending || messagesLoading}>
+                    {isSending ? (
+                      "Sending..."
+                    ) : (
+                      <img src={SendIcon} className="icon" alt="Send" />
+                    )}
                   </button>
+
                   <input
                     type="file"
                     ref={fileInputRef}
