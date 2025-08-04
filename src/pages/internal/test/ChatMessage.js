@@ -391,7 +391,7 @@ const ChatMessage = ({ selectedRoom, back, socket, fetchRooms }) => {
                     onClick={handleSendMessage}
                     disabled={isSending || messagesLoading}>
                     {isSending ? (
-                      "Sending..."
+                      <Loader size={"sm"} />
                     ) : (
                       <img src={SendIcon} className="icon" alt="Send" />
                     )}
