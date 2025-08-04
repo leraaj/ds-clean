@@ -238,13 +238,11 @@ const ChatMessage = ({ selectedRoom, back, socket, fetchRooms }) => {
   const [isSending, setIsSending] = useState(false); // new state
 
   const handleKeyDown = (event) => {
-    if (event.key === "Enter") {
-      setIsSending(true);
-      sendButtonRef.current.disabled = true;
+    if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      setTimeout(() => {
-        handleSendMessage(); // safe now because of the isSending guard
-      }, 100);
+      if (isSending || !message.trim()) return; // guard
+
+      handleSendMessage();
     }
   };
 
