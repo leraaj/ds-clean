@@ -16,6 +16,12 @@ const ViewApplicationModal = ({ show, onHide, id, refresh }) => {
     path: "application",
     id: id,
   });
+  const { refresh: applicationsRefresh } = useFetch(
+    `${API_URL}/api/applications`
+  );
+  const { refresh: appointmentsRefresh } = useFetch(
+    `${API_URL}/api/appointments`
+  );
   const [meetingLink, setMeetingLink] = useState("");
   const [meetingTime, setMeetingTime] = useState("");
 
@@ -38,12 +44,6 @@ const ViewApplicationModal = ({ show, onHide, id, refresh }) => {
     application?.applicationStatus === 2 &&
     application?.complete === 1;
 
-  const { refresh: applicationsRefresh } = useFetch(
-    `${API_URL}/api/applications`
-  );
-  const { refresh: appointmentsRefresh } = useFetch(
-    `${API_URL}/api/appointments`
-  );
   const handleMeetingLink = (e) => {
     setMeetingLink(e.target.value);
   };

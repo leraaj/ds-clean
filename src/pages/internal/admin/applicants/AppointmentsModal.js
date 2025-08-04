@@ -251,8 +251,10 @@ const AppointmentsModal = ({ show, onHide, isLoading, refresh, user }) => {
                 label="View"
                 onClick={() => {
                   setAppointmentId(row.original.id);
-                  showAppmViewModal();
-                  console.log(row.original);
+                  setTimeout(() => {
+                    showAppmViewModal();
+                    // console.log(row.original);
+                  }, 100);
                 }}
               />
             </div>
@@ -261,7 +263,10 @@ const AppointmentsModal = ({ show, onHide, isLoading, refresh, user }) => {
       </Modal>
       <ViewAppointmentsModal
         show={appmViewModal}
-        onHide={hideAppmViewModal}
+        onHide={() => {
+          hideAppmViewModal();
+          setAppointmentId(null);
+        }}
         id={appointmentId}
         refresh={refreshData}
       />

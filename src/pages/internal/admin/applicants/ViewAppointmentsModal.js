@@ -193,7 +193,7 @@ const ViewAppointmentsModal = ({ show, onHide, id, refresh }) => {
                 disabled={!remarks}
               />
               <CustomButton
-                color="secondary"
+                color="success"
                 label="Proceed"
                 onClick={() => setShowMeetingForms(true)}
                 disabled={!remarks}
@@ -211,7 +211,7 @@ const ViewAppointmentsModal = ({ show, onHide, id, refresh }) => {
                   disabled={!remarks}
                 />
                 <CustomButton
-                  color="secondary"
+                  color="success"
                   label="Proceed"
                   onClick={() => setShowMeetingForms(true)}
                   disabled={!remarks}
@@ -289,7 +289,7 @@ const ViewAppointmentsModal = ({ show, onHide, id, refresh }) => {
                 disabled={!remarks}
               />
               <CustomButton
-                color="secondary"
+                color="succcess"
                 label="Proceed"
                 onClick={() => setShowMeetingForms(true)}
                 disabled={!remarks}
