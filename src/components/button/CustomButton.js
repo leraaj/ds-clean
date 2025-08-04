@@ -13,9 +13,10 @@ const CustomButton = ({
   return (
     <button
       type={"button"}
-      className={`btn btn-${color && `btn-` + color} ${
-        size && `btn-` + size
-      } text-nowrap ${className}`}
+      className={`btn 
+      btn-${color ? color : "primary"} 
+      ${size ? `btn-` + size : ""} 
+      text-nowrap ${className}`}
       {...((disabled || isLoading) && { disabled: true })}
       onClick={onClick}>
       {label}
